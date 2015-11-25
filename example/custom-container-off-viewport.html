@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Example with a custom container</title>
+  <title>Off-viewport custom container example</title>
 
   <style>
     #container {
       height: 150px;
-      margin: 50px;
+      margin: 2000px 50px 50px;
       border: 1px solid #000;
-      overflow: auto;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
     #wrapper {
-      padding: 0 2000px;
+      padding: 0 2000px 0 0;
     }
     #test {
       position: relative;
@@ -22,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Custom container example</h1>
+  <h1>Off-viewport custom container example</h1>
 
   <div id="container">
     <div id="wrapper">
