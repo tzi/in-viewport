@@ -6,9 +6,10 @@ describe('using offsets with a div as a reference container', function() {
   var test;
   var container;
   var calls;
-  var width = 500;
+  var size = 300;
   var position = 1000;
   var offset = 200;
+  var containerTop = 3000;
 
   beforeEach(function() {
     calls = [];
@@ -24,8 +25,9 @@ describe('using offsets with a div as a reference container', function() {
         id: 'container'
       },
       style: {
-        width: width + 'px',
-        height: width + 'px',
+        top: containerTop + 'px',
+        width: size + 'px',
+        height: size + 'px',
         overflow: 'scroll'
       }
     });
@@ -41,52 +43,64 @@ describe('using offsets with a div as a reference container', function() {
     }, cb);
   });
 
-  describe('when we scroll down on body', function() {
-    beforeEach(h.scroller(position, position));
+  describe('when we do not scroll down on body', function() {
 
-    it('cb not called', function() {
-      assert.strictEqual(calls.length, 0);
+    describe('when we scroll inside the container', function() {
+
+      describe('to the element', function () {
+        var scrollToTheElement = position - size;
+        beforeEach(h.scroller(scrollToTheElement, scrollToTheElement, 'container'));
+        beforeEach(h.wait(50));
+
+        it('cb not called', function () {
+          assert.strictEqual(calls.length, 0);
+        });
+      });
     });
   });
 
-  describe('when we scroll inside the container', function() {
+  describe('when we scroll down on body', function() {
+    beforeEach(h.scroller(0, containerTop));
 
-    describe('before the element', function () {
-      var scrollBefore = position - width - offset - 2;
-      beforeEach(h.scroller(100, 100, 'container'));
-      beforeEach(h.scroller(scrollBefore, scrollBefore, 'container'));
+    describe('when we scroll inside the container', function() {
 
-      it('cb not called', function() {
-        assert.strictEqual(calls.length, 0);
+      describe('to the element', function() {
+        var scrollToTheElement = position - size;
+        beforeEach(h.scroller(scrollToTheElement, scrollToTheElement, 'container'));
+        beforeEach(h.wait(50));
+
+        it('cb was called', function() {
+          assert.strictEqual(calls.length, 1);
+        });
       });
-    });
 
-    describe('too far after the element', function() {
-      var scrollFarAfter = 2 * position;
-      beforeEach(h.scroller(scrollFarAfter, scrollFarAfter, 'container'));
+      describe('before the element', function () {
+        var scrollBefore = position - size - offset - 2;
+        beforeEach(h.scroller(100, 100, 'container'));
+        beforeEach(h.scroller(scrollBefore, scrollBefore, 'container'));
 
-      it('cb not called', function() {
-        assert.strictEqual(calls.length, 0);
+        it('cb not called', function() {
+          assert.strictEqual(calls.length, 0);
+        });
       });
-    });
 
-    describe('to the element', function() {
-      var scrollToTheElement = position - width;
-      beforeEach(h.scroller(scrollToTheElement, scrollToTheElement, 'container'));
-      beforeEach(h.wait(50));
+      describe('in the offset range', function() {
+        var scrollInTheOffset = position - size - offset;
+        beforeEach(h.scroller(scrollInTheOffset, scrollInTheOffset, 'container'));
+        beforeEach(h.wait(50));
 
-      it('cb was called', function() {
-        assert.strictEqual(calls.length, 1);
+        it('cb was called', function() {
+          assert.strictEqual(calls.length, 1);
+        });
       });
-    });
 
-    describe('in the offset range', function() {
-      var scrollInTheOffset = position - width - offset;
-      beforeEach(h.scroller(scrollInTheOffset, scrollInTheOffset, 'container'));
-      beforeEach(h.wait(50));
+      describe('too far after the element', function() {
+        var scrollFarAfter = 2 * position;
+        beforeEach(h.scroller(scrollFarAfter, scrollFarAfter, 'container'));
 
-      it('cb was called', function() {
-        assert.strictEqual(calls.length, 1);
+        it('cb not called', function() {
+          assert.strictEqual(calls.length, 0);
+        });
       });
     });
   });
