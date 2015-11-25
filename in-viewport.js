@@ -14,8 +14,8 @@ function inViewport(elt, params, cb) {
     params = {};
   }
 
-  var container = opts.container = params.container || opts.container;
-  var offset = opts.offset = params.offset || opts.offset;
+  var container = params.container || opts.container;
+  var offset = params.offset || opts.offset;
 
   for (var i = 0; i < instances.length; i++) {
     if (instances[i].container === container) {
@@ -76,10 +76,11 @@ function createInViewport(container) {
   var scrollContainer = container === global.document.body ? global : container;
   var debouncedCheck = debounce(watches.checkAll(watchInViewport), 15);
 
-  addEvent(scrollContainer, 'scroll', debouncedCheck);
+  addEvent(global, 'scroll', debouncedCheck);
+  addEvent(global, 'resize', debouncedCheck);
 
-  if (scrollContainer === global) {
-    addEvent(global, 'resize', debouncedCheck);
+  if (scrollContainer !== global) {
+    addEvent(scrollContainer, 'scroll', debouncedCheck);
   }
 
   if (supportsMutationObserver) {
@@ -87,7 +88,7 @@ function createInViewport(container) {
   }
 
   // failsafe check, every 200ms we check for visible images
-  // usecase: a hidden parent containing eleements
+  // usecase: a hidden parent containing elements
   // when the parent becomes visible, we have no event that the children
   // became visible
   setInterval(debouncedCheck, 150);
@@ -136,35 +137,35 @@ function createInViewport(container) {
     }
 
     var eltRect = elt.getBoundingClientRect();
-    var viewport = {};
+    var viewport = {
+      top: 0,
+      left: 0,
+      right: global.document.documentElement.clientWidth,
+      bottom: global.document.documentElement.clientHeight
+    };
 
-    if (container === global.document.body) {
-      viewport = {
-        top: -offset,
-        left: -offset,
-        right: global.document.documentElement.clientWidth + offset,
-        bottom: global.document.documentElement.clientHeight + offset
-      };
-    } else {
-      var containerRect = container.getBoundingClientRect();
-      viewport = {
-        top: containerRect.top - offset,
-        left: containerRect.left - offset,
-        right: containerRect.right + offset,
-        bottom: containerRect.bottom + offset
-      };
+    // If the element is not is the visible part of the viewport
+    if (!isInClientRect(eltRect, viewport, offset)) {
+      return false;
     }
 
-    // The element must overlap with the visible part of the viewport
-    var visible =
-      (
-        eltRect.right >= viewport.left &&
-        eltRect.left <= viewport.right &&
-        eltRect.bottom >= viewport.top &&
-        eltRect.top <= viewport.bottom
-      );
+    // If the element is not referenced in a custom container
+    if (container === global.document.body) {
+      return true;
+    }
 
-    return visible;
+    // Check if the element is in the visible part of its custom container
+    var containerRect = container.getBoundingClientRect();
+    return isInClientRect(eltRect, containerRect, offset);
+  }
+
+  function isInClientRect(eltRect, containerRect, offset) {
+    return (
+      eltRect.right >= containerRect.left - offset &&
+      eltRect.left <= containerRect.right + offset &&
+      eltRect.bottom >= containerRect.top - offset &&
+      eltRect.top <= containerRect.bottom + offset
+    );
   }
 
   return {
@@ -226,7 +227,7 @@ function observeDOM(watches, container, cb) {
   observer.observe(container, {
     childList: true,
     subtree: true,
-    // changes like style/width/height/display will be catched
+    // changes like style/width/height/display will be catch
     attributes: true
   });
 
