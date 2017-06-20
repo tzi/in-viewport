@@ -61,26 +61,26 @@ function debounce(func, wait, immediate) {
 }
 
 // https://github.com/jquery/sizzle/blob/3136f48b90e3edc84cbaaa6f6f7734ef03775a07/sizzle.js#L708
-var contains = function() {
+var contains = function(a, b) {
   if (!global.document) {
     return true;
   }
-  return global.document.documentElement.compareDocumentPosition ?
-    function (a, b) {
-      return !!(a.compareDocumentPosition(b) & 16);
-    } :
-    global.document.documentElement.contains ?
-      function (a, b) {
-        return a !== b && ( a.contains ? a.contains(b) : false );
-      } :
-      function (a, b) {
-        while (b = b.parentNode) {
-          if (b === a) {
-            return true;
-          }
-        }
-        return false;
-      };
+
+  if (global.document.documentElement.compareDocumentPosition) {
+    return !!(a.compareDocumentPosition(b) & 16);
+  }
+
+  if (global.document.documentElement.contains) {
+    return a !== b && ( a.contains ? a.contains(b) : false );
+  }
+
+  while (b = b.parentNode) {
+    if (b === a) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function createInViewport(container, debounceValue, failsafe) {
