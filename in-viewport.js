@@ -148,6 +148,11 @@ function createInViewport(container, debounceValue, failsafe) {
       return false;
     }
 
+    // Check if the element is displayed
+    if (el.offsetParent === null) {
+      return false;
+    }
+
     var eltRect = elt.getBoundingClientRect();
     var viewport = {};
 

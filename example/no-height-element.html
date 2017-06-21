@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invisible element example</title>
+
+  <style>
+    .context {
+      margin-bottom: 2000px;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="context">Invisible element example</h1>
+
+  <img class="test" />
+
+  <script src="../build/in-viewport.min.js"></script>
+  <script>
+  var el = document.querySelector('.test');
+
+  inViewport(el, function() {
+    alert('in viewport');
+  });
+  </script>
+</body>
+</html>
